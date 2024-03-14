@@ -1,0 +1,125 @@
+import random
+import datetime
+
+class Nurse:
+    def __init__(self, name, specialty, experience_level, experience_years, department):
+        self.name = name
+        self.specialty = specialty
+        self.experience_level = experience_level
+        self.experience_years = experience_years
+        self.department = department
+
+class Shift:
+    def __init__(self, shift_id, date, start_time, end_time, specialty_required, department_required):
+        self.shift_id = shift_id
+        self.date = date
+        self.start_time = start_time
+        self.end_time = end_time
+        self.specialty_required = specialty_required
+        self.department_required = department_required
+        self.assigned_nurse = None
+
+class NurseAllocationSystem:
+    def __init__(self):
+        self.nurses = []
+        self.shifts = []
+
+    def add_nurse(self, name, specialty, department):
+        experience_level = random.choice(["Junior", "Intermediate", "Senior"])
+        experience_years = random.randint(1, 10)  # Random years of experience between 1 and 10
+        nurse = Nurse(name, specialty, experience_level, experience_years, department)
+        self.nurses.append(nurse)
+        print(f"Added Nurse: {name}, Specialty: {specialty}, Experience Level: {experience_level}, Experience Years: {experience_years}, Department: {department}")
+
+    def generate_shifts(self, num_shifts):
+        specialties = {
+            "Eye": ["Ophthalmology"],
+            "Gynecologist": ["Obstetrics", "Gynecology"],
+            "Dentist": ["Dentistry"],
+            "ENT": ["Otorhinolaryngology"],
+            "Psychology": ["Psychiatry"]
+        }
+
+        start_date = datetime.date.today()
+        for i in range(num_shifts):
+            shift_id = i + 1
+            date = start_date + datetime.timedelta(days=i)
+            start_time = "08:00"
+            end_time = "16:00"
+            department_required = random.choice(list(specialties.keys()))
+            specialty_required = random.choice(specialties[department_required])
+            shift = Shift(shift_id, date, start_time, end_time, specialty_required, department_required)
+            self.shifts.append(shift)
+
+    def assign_nurses_to_shifts(self):
+        for shift in self.shifts:
+            eligible_nurses = [nurse for nurse in self.nurses if nurse.specialty == shift.specialty_required and nurse.department == shift.department_required]
+            if eligible_nurses:
+                shift.assigned_nurse = random.choice(eligible_nurses)
+
+    def display_shifts(self):
+        for shift in self.shifts:
+            assigned_nurse_name = 'Not Assigned'
+            experience_level = 'N/A'
+            experience_years = 'N/A'
+
+            if shift.assigned_nurse:
+                assigned_nurse_name = shift.assigned_nurse.name
+                experience_level = shift.assigned_nurse.experience_level
+                experience_years = shift.assigned_nurse.experience_years
+
+            print(f"Shift ID: {shift.shift_id}, Date: {shift.date}, "
+                  f"Start Time: {shift.start_time}, End Time: {shift.end_time}, "
+                  f"Department Required: {shift.department_required}, "
+                  f"Specialty Required: {shift.specialty_required}, "
+                  f"Assigned Nurse: {assigned_nurse_name}, "
+                  f"Experience Level: {experience_level}, "
+                  f"Experience Years: {experience_years}")
+
+if __name__ == "__main__":
+    system = NurseAllocationSystem()
+
+    # Adding nurses
+    print("Adding Nurses:")
+    system.add_nurse("Alice", "Ophthalmology", "Eye")
+    system.add_nurse("Bob", "Obstetrics", "Gynecologist")
+    system.add_nurse("Charlie", "Dentistry", "Dentist")
+    system.add_nurse("David", "Otorhinolaryngology", "ENT")
+    system.add_nurse("Eve", "Psychiatry", "Psychology")
+
+    # Generating shifts
+    num_shifts = int(input("Enter the number of shifts: "))
+    system.generate_shifts(num_shifts)
+
+    # Assigning nurses to shifts
+    system.assign_nurses_to_shifts()
+
+    # Displaying shifts
+    print("\nShifts:")
+    system.display_shifts()
+
+    # Get ID from the user
+    while True:
+        try:
+            shift_id = int(input("\nEnter the Shift ID to view details (or enter 0 to exit): "))
+            if shift_id == 0:
+                break  # Exit loop if the user enters 0
+            else:
+                # Find and display details of the shift with the provided ID
+                shift = next((shift for shift in system.shifts if shift.shift_id == shift_id), None)
+                if shift:
+                    print("\nShift Details:")
+                    print(f"Shift ID: {shift.shift_id}, Date: {shift.date}, "
+                          f"Start Time: {shift.start_time}, End Time: {shift.end_time}, "
+                          f"Department Required: {shift.department_required}, "
+                          f"Specialty Required: {shift.specialty_required}")
+                    if shift.assigned_nurse:
+                        print(f"Assigned Nurse: {shift.assigned_nurse.name}, "
+                              f"Experience Level: {shift.assigned_nurse.experience_level}, "
+                              f"Experience Years: {shift.assigned_nurse.experience_years}")
+                    else:
+                        print("No nurse assigned to this shift yet.")
+                else:
+                    print("Shift ID not found.")
+        except ValueError:
+            print("Invalid input. Please enter a valid Shift ID (an integer).")
